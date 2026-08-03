@@ -1,0 +1,53 @@
+add_newline = true
+
+format = """
+[](bold)$username[at ](bold white)$env_var$hostname[in ](bold white)$directory$git_branch$git_status$nix_shell$jobs$cmd_duration
+$character
+"""
+
+[env_var.SSH_CONNECTION]
+variable = "SSH_CONNECTION"
+format = "[🌐 ](bold green)"
+
+[username]
+style_user = "bold 166"
+format = "[$user ]($style)"
+show_always = true
+
+[hostname]
+ssh_only = false
+format = "[$hostname ](bold 136)"
+
+[directory]
+format = "[$path ](bold 64)"
+truncation_length = 0
+
+[git_branch]
+format = "[on ](bold white)[$branch ](bold 61)"
+
+[git_status]
+format = '([\[$all_status$ahead_behind\]]($style) )'
+style = "bold 33"
+staged = "+"
+modified = "!"
+untracked = "?"
+stashed = "$"
+
+[nix_shell]
+format = "via [$symbol$state]($style) "
+symbol = "❄️ "
+style = "bold blue"
+
+[jobs]
+format = "[$symbol$number]($style) "
+symbol = "⚙ "
+style = "bold blue"
+number_threshold = 1
+
+[cmd_duration]
+min_time = 2_000
+format = "[took $duration](bold yellow) "
+
+[character]
+success_symbol = "[\\$](bold white)"
+error_symbol = "[\\$](bold red)"
