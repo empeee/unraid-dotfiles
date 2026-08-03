@@ -29,9 +29,12 @@ persists its installs via `/boot/extra` automatically, and the starship binary i
 straight on the persistent `/boot` flash.
 
 ```bash
-# Neovim + modern CLI tools, via Unraid's un-get (NerdPack) package manager
+# Neovim + modern CLI tools, via Unraid's un-get (NerdPack) package manager.
+# The neovim package doesn't declare its own shared-library deps (Slackware packages
+# generally don't do dependency resolution) — luv/lua-lpeg/tree-sitter/utf8proc/unibilium/luajit
+# were all needed too, found by iterating `ldd $(command -v nvim) | grep "not found"` until clean.
 un-get update
-un-get install neovim eza bat fd ripgrep fzf git-delta
+un-get install neovim eza bat fd ripgrep fzf git-delta luv lua-lpeg tree-sitter utf8proc unibilium luajit
 
 # starship prompt (not in un-get's repos) — musl build, fully static
 mkdir -p /boot/config/unraid-dotfiles/bin
