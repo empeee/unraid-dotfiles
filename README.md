@@ -64,8 +64,10 @@ if [ -d ~/src/nvim-config ]; then (cd ~/src/nvim-config && git pull); else git c
 mkdir -p ~/.config
 ln -sfn ~/src/nvim-config ~/.config/nvim
 
-# starship (static binary cached on persistent /boot flash; skip gracefully if absent)
-if [ -x /boot/config/unraid-dotfiles/bin/starship ]; then
+# starship (static binary cached on persistent /boot flash; skip gracefully if absent).
+# /boot is FAT32, which can't carry an executable bit at all, so this checks -f (exists)
+# rather than -x, and always chmods after copying onto the RAM root.
+if [ -f /boot/config/unraid-dotfiles/bin/starship ]; then
   cp /boot/config/unraid-dotfiles/bin/starship /usr/local/bin/starship
   chmod +x /usr/local/bin/starship
 fi
