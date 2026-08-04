@@ -46,6 +46,42 @@ If the starship binary ever causes trouble, delete
 `/boot/config/unraid-dotfiles/bin/starship` — the boot script skips it gracefully and `bashrc`
 falls back to a plain colored prompt. No other changes needed to back out.
 
+### Web terminal (ttyd) icon font
+
+Unraid's browser-based web terminal (`ttyd`) needs a real Nerd Font installed on whatever
+machine is running the browser to render eza's icons — unlike Ghostty/SSH, it has no built-in
+icon-glyph fallback. `JetBrainsMono Nerd Font Mono` is what's used here, matching the font
+`nixos-dotfiles` installs on every other machine (`modules/darwin-common.nix` for the Macs,
+`modules/fonts.nix` for Linux desktop hosts).
+
+This isn't managed by this repo or the boot script — it's two **stock Unraid files**, edited
+directly on the box, living on the RAM root (not persisted across reboot on their own, and
+could be silently overwritten by a future Unraid OS/webGUI update). `.bak-<timestamp>` copies
+of the originals sit next to each file if you need to diff or revert.
+
+```bash
+# /etc/default/ttyd — switched from a plain string to a bash array so a multi-word
+# fontFamily value survives; ttyd-exec's raw $TTYD_OPTS expansion is unquoted otherwise.
+TTYD_OPTS=(-W -t rendererType=canvas -t closeOnDisconnect=true -t disableLeaveAlert=true -t "theme={'background':'black'}" -t fontSize=15 -t "fontFamily=JetBrainsMono Nerd Font Mono")
+```
+
+```bash
+# /usr/local/sbin/ttyd-exec
+#!/bin/bash
+source /etc/default/ttyd
+exec /usr/bin/ttyd -d0 "${TTYD_OPTS[@]}" "$@" &>/dev/null &
+```
+
+After editing, kill the running `ttyd` master so a fresh one respawns with the new config —
+Unraid's `OpenTerminal.php` auto-kills/respawns it via `ttyd-exec` anyway whenever a terminal is
+opened with zero existing connected sessions, so editing without restarting will just get
+silently reverted the next time someone opens a terminal tab:
+
+```bash
+kill "$(pgrep -f '^/usr/bin/ttyd -d0')"
+rm -f /var/run/ttyd.sock
+```
+
 ## Boot script
 
 The Unraid User Scripts entry (`Settings → User Scripts → SetupDotFiles`, "Run on array
